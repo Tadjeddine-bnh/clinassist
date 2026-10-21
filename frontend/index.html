@@ -310,6 +310,7 @@ function detailText(data, status) {
 const INLINE_RE = /\[\s*source:\s*([^\]]+?)\s*\]|【\s*([^】]+?)\s*】|\*\*([^*]+)\*\*/gi;
 
 function citeChip(source) {
+  source = source.replace(/^source:\s*/i, '');
   const short = source.replace(/\.(pdf|txt)$/i, '').replace(/_(ocr|transcript|classification)$/i, '');
   const chip = el('span', 'cite', short);
   chip.title = source;

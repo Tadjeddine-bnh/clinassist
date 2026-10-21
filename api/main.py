@@ -48,7 +48,7 @@ from ocr.extract import extract_text
 from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from config import settings, GIT_COMMIT
-
+from typing import Literal
 @asynccontextmanager
 async def lifespan(app):
     print("Warming up models...")
@@ -80,6 +80,13 @@ agent = build_graph()
 # ─────────────────────────────────────────
 class ChatRequest(BaseModel):
     question: str
+
+
+class FeedbackRequest(BaseModel):
+    trace_id: str
+    value: Literal[0, 1]          # 1 = helpful, 0 = not helpful; anything else gets a 422
+
+
 
 class ChatResponse(BaseModel):
     question: str
@@ -183,6 +190,15 @@ def chat(request: ChatRequest):
 
     return ChatResponse(question=q, answer=result["final_answer"],
                         tools_used=result["tools_needed"], trace_id=trace_id)
+    
+    
+    
+@app.post("/feedback")
+def feedback(req: FeedbackRequest):
+    get_client().create_score(trace_id=req.trace_id, name="user_feedback",
+                              value=req.value, data_type="NUMERIC")
+    return {"ok": True}
+
 @app.post("/ingest", response_model=IngestResponse)
 def ingest(file: UploadFile = File(...)):
     """Upload a file (PDF, image, audio, txt); it's extracted and ingested automatically."""

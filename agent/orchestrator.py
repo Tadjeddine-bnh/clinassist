@@ -22,7 +22,7 @@ from knowledge_base.resources import get_collection
 
 from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
-
+from langfuse import get_client
 
 ROOT = Path(__file__).parent.parent
 PROCESSED_DIR = settings.processed_dir         
@@ -53,7 +53,18 @@ class AgentState(TypedDict):
 def tool_rag(question: str) -> str:
     """Retrieve relevant chunks from the clinical knowledge base."""
     collection = get_collection()
-    results = collection.query(query_texts=[question], n_results=settings.top_k)
+    with get_client().start_as_current_observation(as_type="span", name="retrieval") as span:
+        results = collection.query(
+            query_texts=[question], n_results=settings.top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+        span.update(
+            input={"question": question, "top_k": settings.top_k},
+            output=[
+                {"source": m["source"], "chunk": m["chunk_index"], "distance": round(d, 3), "preview": doc[:150]}
+                for doc, m, d in zip(results["documents"][0], results["metadatas"][0], results["distances"][0])
+            ],
+        )
     chunks = []
     for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
         chunks.append(f"[source: {meta['source']}]\n{doc}")
