@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClinAssist</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e8e8e8;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 24px;
+    border-bottom: 0.5px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo {
+    width: 28px; height: 28px;
+    background: #2563eb;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: white;
+  }
+
+  header h1 { font-size: 15px; font-weight: 500; color: #e8e8e8; }
+  header span { font-size: 12px; color: #555; margin-left: 4px; }
+
+  .status {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #555;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .message { display: flex; gap: 12px; max-width: 780px; }
+  .message.user { margin-left: auto; flex-direction: row-reverse; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+
+  .avatar.ai { background: #1e3a5f; color: #60a5fa; }
+  .avatar.user { background: #1e2a1e; color: #4ade80; }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 640px;
+  }
+
+  .message.ai .bubble {
+    background: #1a1a2e;
+    border: 0.5px solid #2a2a3e;
+    color: #d0d0e8;
+  }
+
+  .message.user .bubble {
+    background: #1e3a5f;
+    border: 0.5px solid #2a4a7f;
+    color: #bfdbfe;
+  }
+
+  .tools-badge {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .badge {
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+    border: 0.5px solid;
+  }
+
+  .badge.rag { background: #1e2a1e; color: #4ade80; border-color: #166534; }
+  .badge.cv  { background: #1e1e3a; color: #818cf8; border-color: #3730a3; }
+  .badge.asr { background: #2a1e1e; color: #f87171; border-color: #991b1b; }
+  .badge.ocr { background: #2a1e2a; color: #e879f9; border-color: #86198f; }
+
+  .upload-area {
+    margin: 0 24px;
+    border: 0.5px dashed #2a2a2a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    background: #14141a;
+  }
+
+  .upload-area:hover { border-color: #444; }
+  .upload-area input { display: none; }
+
+  .upload-icon { font-size: 18px; color: #555; }
+  .upload-text { font-size: 12px; color: #555; }
+  .upload-text strong { color: #888; font-weight: 500; }
+
+  .upload-status {
+    margin-left: auto;
+    font-size: 11px;
+    color: #4ade80;
+    display: none;
+  }
+
+  .input-row {
+    padding: 16px 24px;
+    display: flex; gap: 10px;
+    border-top: 0.5px solid #1a1a1a;
+  }
+
+  .input-row textarea {
+    flex: 1;
+    background: #14141a;
+    border: 0.5px solid #2a2a2a;
+    border-radius: 10px;
+    color: #e8e8e8;
+    font-size: 14px;
+    padding: 10px 14px;
+    resize: none;
+    height: 44px;
+    line-height: 1.5;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input-row textarea:focus { border-color: #2563eb; }
+  .input-row textarea::placeholder { color: #444; }
+
+  .send-btn {
+    background: #2563eb;
+    border: none; border-radius: 10px;
+    width: 44px; height: 44px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: #1d4ed8; }
+  .send-btn:disabled { background: #1a1a2e; cursor: not-allowed; }
+
+  .send-btn svg { width: 16px; height: 16px; fill: white; }
+
+  .thinking {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #555;
+  }
+
+  .dot-pulse { display: flex; gap: 4px; }
+  .dot-pulse span {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: #555;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+  }
+
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: #333;
+  }
+
+  .empty-state h2 { font-size: 20px; font-weight: 500; color: #444; margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; color: #333; }
+
+  .suggestions {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .suggestion {
+    background: #14141a;
+    border: 0.5px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px; color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .suggestion:hover { border-color: #2563eb; color: #93c5fd; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">C+</div>
+  <h1>ClinAssist</h1>
+  <span>Clinical AI assistant</span>
+  <div class="status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">connecting…</span>
+  </div>
+</header>
+
+<div class="chat-area" id="chatArea">
+  <div class="empty-state" id="emptyState">
+    <h2>ClinAssist</h2>
+    <p>Ask a clinical question or upload a document, image, or audio file.</p>
+    <div class="suggestions">
+      <div class="suggestion" onclick="fillQuestion(this)">What are the signs of severe dehydration in children?</div>
+      <div class="suggestion" onclick="fillQuestion(this)">What does the chest x-ray show?</div>
+      <div class="suggestion" onclick="fillQuestion(this)">Summarize the discharge summary</div>
+      <div class="suggestion" onclick="fillQuestion(this)">What did the clinician dictate?</div>
+    </div>
+  </div>
+</div>
+
+<label class="upload-area" id="uploadArea">
+  <input type="file" id="fileInput" accept=".pdf,.txt,.jpg,.jpeg,.png,.mp3,.wav,.m4a" onchange="uploadFile(this)">
+  <span class="upload-icon">↑</span>
+  <div class="upload-text"><strong>Upload a file</strong> — PDF, image, or audio</div>
+  <span class="upload-status" id="uploadStatus"></span>
+</label>
+
+<div class="input-row">
+  <textarea id="questionInput" placeholder="Ask a clinical question…" onkeydown="handleKey(event)"></textarea>
+  <button class="send-btn" id="sendBtn" onclick="sendQuestion()">
+    <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+  </button>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+
+async function checkHealth() {
+  try {
+    const r = await fetch(API + '/health');
+    if (r.ok) {
+      document.getElementById('statusDot').style.background = '#22c55e';
+      document.getElementById('statusText').textContent = 'online';
+    } else throw new Error();
+  } catch {
+    document.getElementById('statusDot').style.background = '#ef4444';
+    document.getElementById('statusText').textContent = 'offline — start the API';
+  }
+}
+
+function fillQuestion(el) {
+  document.getElementById('questionInput').value = el.textContent;
+  document.getElementById('questionInput').focus();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
+}
+
+function addMessage(role, content, tools) {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+
+  const chat = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'message ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ' + role;
+  avatar.textContent = role === 'ai' ? 'AI' : 'You';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = content.replace(/\n/g, '<br>');
+
+  if (tools && tools.length) {
+    const badges = document.createElement('div');
+    badges.className = 'tools-badge';
+    tools.forEach(t => {
+      const b = document.createElement('span');
+      b.className = 'badge ' + t;
+      b.textContent = t.toUpperCase();
+      badges.appendChild(b);
+    });
+    bubble.appendChild(badges);
+  }
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function addThinking() {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+
+  const chat = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'message ai';
+  div.id = 'thinking';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai';
+  avatar.textContent = 'AI';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble thinking';
+  bubble.innerHTML = '<div class="dot-pulse"><span></span><span></span><span></span></div>';
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendQuestion() {
+  const input = document.getElementById('questionInput');
+  const q = input.value.trim();
+  if (!q) return;
+
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+  addMessage('user', q);
+  addThinking();
+
+  try {
+    const r = await fetch(API + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+
+    const data = await r.json();
+    document.getElementById('thinking')?.remove();
+
+    if (r.ok) {
+      addMessage('ai', data.answer, data.tools_used);
+    } else {
+      addMessage('ai', 'Error: ' + (data.detail || 'Something went wrong.'));
+    }
+  } catch (e) {
+    document.getElementById('thinking')?.remove();
+    addMessage('ai', 'Could not reach the API. Make sure the server is running at localhost:8000.');
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('questionInput').focus();
+}
+
+async function uploadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status = document.getElementById('uploadStatus');
+  status.style.display = 'block';
+  status.textContent = 'Uploading…';
+  status.style.color = '#888';
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const r = await fetch(API + '/ingest', { method: 'POST', body: form });
+    const data = await r.json();
+
+    if (r.ok) {
+      status.textContent = `✓ ${data.chunks_added} chunks ingested`;
+      status.style.color = '#4ade80';
+    } else {
+      status.textContent = 'Upload failed';
+      status.style.color = '#ef4444';
+    }
+  } catch {
+    status.textContent = 'Could not reach API';
+    status.style.color = '#ef4444';
+  }
+
+  setTimeout(() => { status.style.display = 'none'; input.value = ''; }, 3000);
+}
+
+checkHealth();
+setInterval(checkHealth, 10000);
+</script>
+</body>
+</html>
