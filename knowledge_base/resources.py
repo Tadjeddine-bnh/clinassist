@@ -25,3 +25,7 @@ def get_collection():
 def get_whisper():
     import whisper
     return whisper.load_model(settings.whisper_model)
+@lru_cache
+def get_ocr_reader():
+    import easyocr
+    return easyocr.Reader(["en"], gpu=False)

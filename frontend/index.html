@@ -2,414 +2,514 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClinAssist</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    color-scheme: light;
+    --paper: #F2F5F7;
+    --surface: #FFFFFF;
+    --ink: #15293B;
+    --muted: #5B6B79;
+    --line: #D5DEE5;
+    --accent: #0E7C7B;
+    --accent-soft: #DCEFEE;
+    --on-accent: #FFFFFF;
+    --warn: #8A5A0E;
+    --warn-soft: #FBF1DE;
+    --danger: #B42318;
+    --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --paper: #0E1A24;
+      --surface: #142431;
+      --ink: #E3ECF2;
+      --muted: #8FA3B2;
+      --line: #24394A;
+      --accent: #4FC2BF;
+      --accent-soft: #12393C;
+      --on-accent: #062322;
+      --warn: #E7B65C;
+      --warn-soft: #33270F;
+      --danger: #F07D6E;
+    }
+  }
 
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
   body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: #0f1117;
-    color: #e8e8e8;
-    height: 100vh;
+    font: 15px/1.55 var(--font);
+    background: var(--paper);
+    color: var(--ink);
     display: flex;
     flex-direction: column;
   }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
 
-  header {
-    padding: 16px 24px;
-    border-bottom: 0.5px solid #2a2a2a;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo {
-    width: 28px; height: 28px;
-    background: #2563eb;
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 600; color: white;
-  }
-
-  header h1 { font-size: 15px; font-weight: 500; color: #e8e8e8; }
-  header span { font-size: 12px; color: #555; margin-left: 4px; }
-
-  .status {
-    margin-left: auto;
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; color: #555;
-  }
-
-  .status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #22c55e;
-  }
-
-  .chat-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .message { display: flex; gap: 12px; max-width: 780px; }
-  .message.user { margin-left: auto; flex-direction: row-reverse; }
-
-  .avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600; flex-shrink: 0;
-  }
-
-  .avatar.ai { background: #1e3a5f; color: #60a5fa; }
-  .avatar.user { background: #1e2a1e; color: #4ade80; }
-
-  .bubble {
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.6;
-    max-width: 640px;
-  }
-
-  .message.ai .bubble {
-    background: #1a1a2e;
-    border: 0.5px solid #2a2a3e;
-    color: #d0d0e8;
-  }
-
-  .message.user .bubble {
-    background: #1e3a5f;
-    border: 0.5px solid #2a4a7f;
-    color: #bfdbfe;
-  }
-
-  .tools-badge {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .badge {
-    font-size: 10px; padding: 2px 8px;
-    border-radius: 99px;
-    font-weight: 500;
-    border: 0.5px solid;
-  }
-
-  .badge.rag { background: #1e2a1e; color: #4ade80; border-color: #166534; }
-  .badge.cv  { background: #1e1e3a; color: #818cf8; border-color: #3730a3; }
-  .badge.asr { background: #2a1e1e; color: #f87171; border-color: #991b1b; }
-  .badge.ocr { background: #2a1e2a; color: #e879f9; border-color: #86198f; }
-
-  .upload-area {
-    margin: 0 24px;
-    border: 0.5px dashed #2a2a2a;
-    border-radius: 10px;
-    padding: 12px 16px;
+  /* Header */
+  .top {
     display: flex; align-items: center; gap: 12px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    background: #14141a;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+  .brand small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+  .status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .status.online .dot { background: var(--accent); }
+  .status.offline .dot { background: var(--danger); }
+  .status.offline { color: var(--danger); }
+
+  .notice {
+    padding: 8px 24px;
+    font-size: 13px;
+    color: var(--warn);
+    background: var(--warn-soft);
+    border-bottom: 1px solid var(--line);
   }
 
-  .upload-area:hover { border-color: #444; }
-  .upload-area input { display: none; }
-
-  .upload-icon { font-size: 18px; color: #555; }
-  .upload-text { font-size: 12px; color: #555; }
-  .upload-text strong { color: #888; font-weight: 500; }
-
-  .upload-status {
-    margin-left: auto;
-    font-size: 11px;
-    color: #4ade80;
-    display: none;
+  /* Thread */
+  main { flex: 1; overflow-y: auto; }
+  .thread {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px 40px;
+    display: flex; flex-direction: column; gap: 22px;
   }
 
-  .input-row {
-    padding: 16px 24px;
-    display: flex; gap: 10px;
-    border-top: 0.5px solid #1a1a1a;
+  .empty h1 { font-size: 26px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; max-width: 24ch; }
+  .empty p { margin-top: 10px; color: var(--muted); max-width: 60ch; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .suggestions button {
+    padding: 8px 14px;
+    font-size: 13.5px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
   }
+  .suggestions button:hover { border-color: var(--accent); color: var(--accent); }
 
-  .input-row textarea {
-    flex: 1;
-    background: #14141a;
-    border: 0.5px solid #2a2a2a;
-    border-radius: 10px;
-    color: #e8e8e8;
-    font-size: 14px;
+  .msg-user {
+    align-self: flex-end;
+    max-width: 85%;
     padding: 10px 14px;
-    resize: none;
-    height: 44px;
-    line-height: 1.5;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s;
+    background: var(--accent-soft);
+    border-radius: 14px 14px 4px 14px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
-  .input-row textarea:focus { border-color: #2563eb; }
-  .input-row textarea::placeholder { color: #444; }
+  /* Answer: reads like a chart note, with a teal margin rule */
+  .answer {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px 10px 10px 4px;
+    padding: 16px 18px;
+    overflow-wrap: anywhere;
+  }
+  .answer > * + * { margin-top: 0.6em; }
+  .answer ul, .answer ol { padding-left: 1.3em; }
+  .answer li + li { margin-top: 0.25em; }
+  .answer h3 { font-size: 15px; font-weight: 650; }
 
-  .send-btn {
-    background: #2563eb;
-    border: none; border-radius: 10px;
-    width: 44px; height: 44px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-    flex-shrink: 0;
+  .cite {
+    display: inline-block;
+    max-width: 26ch;
+    margin: 0 2px;
+    padding: 0 7px;
+    font-size: 12px;
+    line-height: 1.6;
+    vertical-align: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 5px;
   }
 
-  .send-btn:hover { background: #1d4ed8; }
-  .send-btn:disabled { background: #1a1a2e; cursor: not-allowed; }
-
-  .send-btn svg { width: 16px; height: 16px; fill: white; }
-
-  .thinking {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; color: #555;
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--muted);
   }
+  .meta .tool { padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px; }
+  .meta .spacer { flex: 1; }
+  .meta button {
+    padding: 3px 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .meta button:hover { color: var(--ink); border-color: var(--muted); }
+  .meta button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 
-  .dot-pulse { display: flex; gap: 4px; }
-  .dot-pulse span {
-    width: 4px; height: 4px; border-radius: 50%;
-    background: #555;
+  .note {
+    padding: 8px 12px;
+    font-size: 13.5px;
+    color: var(--muted);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+  }
+  .note.ok { color: var(--accent); border-style: solid; }
+  .note.error { color: var(--danger); border: 1px solid currentColor; }
+
+  .thinking { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); }
+  .pulse { display: flex; gap: 4px; }
+  .pulse span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
     animation: pulse 1.2s ease-in-out infinite;
   }
-  .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
-  .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+  .pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .pulse span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .pulse span { animation: none; opacity: 0.6; } }
 
-  @keyframes pulse {
-    0%, 80%, 100% { opacity: 0.3; }
-    40% { opacity: 1; }
+  /* Composer */
+  .composer { background: var(--surface); border-top: 1px solid var(--line); }
+  .composer-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 24px 6px;
+    display: flex; align-items: flex-end; gap: 10px;
   }
-
-  .empty-state {
-    margin: auto;
-    text-align: center;
-    color: #333;
+  textarea {
+    flex: 1;
+    min-height: 46px; max-height: 160px;
+    padding: 12px 14px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    resize: none;
   }
-
-  .empty-state h2 { font-size: 20px; font-weight: 500; color: #444; margin-bottom: 8px; }
-  .empty-state p { font-size: 13px; color: #333; }
-
-  .suggestions {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    justify-content: center;
-    margin-top: 20px;
+  textarea:focus { border-color: var(--accent); outline: none; }
+  textarea::placeholder { color: var(--muted); }
+  .icon-btn {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
   }
+  .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .send { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .send:hover { color: var(--on-accent); filter: brightness(1.08); }
+  .send:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+  .hint { max-width: 760px; margin: 0 auto; padding: 0 24px 12px; font-size: 12px; color: var(--muted); }
 
-  .suggestion {
-    background: #14141a;
-    border: 0.5px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 12px; color: #555;
-    cursor: pointer;
-    transition: all 0.15s;
+  .drop {
+    position: fixed; inset: 0; z-index: 10;
+    display: none; place-items: center;
+    font-size: 18px; font-weight: 600;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    border: 3px dashed var(--accent);
   }
+  body.dragging .drop { display: grid; }
 
-  .suggestion:hover { border-color: #2563eb; color: #93c5fd; }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  @media (max-width: 600px) {
+    .top, .notice { padding-left: 16px; padding-right: 16px; }
+    .brand small { display: none; }
+    .thread { padding: 24px 16px 32px; }
+    .composer-inner, .hint { padding-left: 16px; padding-right: 16px; }
+    .empty h1 { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">C+</div>
-  <h1>ClinAssist</h1>
-  <span>Clinical AI assistant</span>
-  <div class="status">
-    <div class="status-dot" id="statusDot"></div>
-    <span id="statusText">connecting…</span>
-  </div>
+<header class="top">
+  <div class="brand">ClinAssist<small>Answers from your clinical sources, with citations</small></div>
+  <div class="status" id="status" role="status"><span class="dot"></span><span id="statusText">Connecting…</span></div>
 </header>
 
-<div class="chat-area" id="chatArea">
-  <div class="empty-state" id="emptyState">
-    <h2>ClinAssist</h2>
-    <p>Ask a clinical question or upload a document, image, or audio file.</p>
-    <div class="suggestions">
-      <div class="suggestion" onclick="fillQuestion(this)">What are the signs of severe dehydration in children?</div>
-      <div class="suggestion" onclick="fillQuestion(this)">What does the chest x-ray show?</div>
-      <div class="suggestion" onclick="fillQuestion(this)">Summarize the discharge summary</div>
-      <div class="suggestion" onclick="fillQuestion(this)">What did the clinician dictate?</div>
-    </div>
+<div class="notice">Research prototype. Don’t use it for real clinical decisions.</div>
+
+<main id="scroller">
+  <div class="thread" id="thread" aria-live="polite">
+    <section class="empty" id="empty">
+      <h1>Ask about paediatric hospital care, or add a patient document.</h1>
+      <p>Answers use only the guidelines and files in the knowledge base, and every claim names its source. Add PDFs, text files, images or audio below.</p>
+      <div class="suggestions">
+        <button type="button">What are the signs of severe dehydration in children?</button>
+        <button type="button">What does the chest x-ray show?</button>
+        <button type="button">Summarize the discharge summary</button>
+        <button type="button">What did the clinician dictate?</button>
+      </div>
+    </section>
   </div>
-</div>
+</main>
 
-<label class="upload-area" id="uploadArea">
-  <input type="file" id="fileInput" accept=".pdf,.txt,.jpg,.jpeg,.png,.mp3,.wav,.m4a" onchange="uploadFile(this)">
-  <span class="upload-icon">↑</span>
-  <div class="upload-text"><strong>Upload a file</strong> — PDF, image, or audio</div>
-  <span class="upload-status" id="uploadStatus"></span>
-</label>
+<footer class="composer">
+  <div class="composer-inner">
+    <button class="icon-btn" id="attachBtn" type="button" title="Add a file" aria-label="Add a file">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5 12.6 19.9a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg>
+    </button>
+    <input type="file" id="fileInput" accept=".pdf,.txt,.jpg,.jpeg,.png,.mp3,.wav,.m4a" multiple hidden>
+    <textarea id="input" rows="1" placeholder="Ask a clinical question" aria-label="Question"></textarea>
+    <button class="icon-btn send" id="sendBtn" type="button" title="Send" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+  <p class="hint">Enter to send, Shift+Enter for a new line. Drop files anywhere to add them.</p>
+</footer>
 
-<div class="input-row">
-  <textarea id="questionInput" placeholder="Ask a clinical question…" onkeydown="handleKey(event)"></textarea>
-  <button class="send-btn" id="sendBtn" onclick="sendQuestion()">
-    <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-  </button>
-</div>
+<div class="drop" aria-hidden="true">Drop to add to the knowledge base</div>
 
 <script>
-const API = 'http://localhost:8000';
+// Same origin as the API: FastAPI serves this page.
+const API = '';
 
-async function checkHealth() {
-  try {
-    const r = await fetch(API + '/health');
-    if (r.ok) {
-      document.getElementById('statusDot').style.background = '#22c55e';
-      document.getElementById('statusText').textContent = 'online';
-    } else throw new Error();
-  } catch {
-    document.getElementById('statusDot').style.background = '#ef4444';
-    document.getElementById('statusText').textContent = 'offline — start the API';
+// Plain-language names for the agent's tools.
+const TOOL_LABELS = { rag: 'Guidelines', ocr: 'Document', asr: 'Transcript', cv: 'X-ray' };
+
+const thread = document.getElementById('thread');
+const scroller = document.getElementById('scroller');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const fileInput = document.getElementById('fileInput');
+let busy = false;
+
+// ---------- Safe DOM helpers: no innerHTML anywhere in this file ----------
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function append(node) {
+  document.getElementById('empty')?.remove();
+  thread.appendChild(node);
+  scroller.scrollTop = scroller.scrollHeight;
+  return node;
+}
+function detailText(data, status) {
+  const d = data && data.detail;
+  if (typeof d === 'string') return d;
+  if (d) return JSON.stringify(d);
+  return `HTTP ${status}`;
+}
+
+// ---------- Rendering the model's answer as text nodes ----------
+// Handles [source: file], 【file】, **bold**, bullet and numbered lists, # headings.
+const INLINE_RE = /\[\s*source:\s*([^\]]+?)\s*\]|【\s*([^】]+?)\s*】|\*\*([^*]+)\*\*/gi;
+
+function citeChip(source) {
+  const short = source.replace(/\.(pdf|txt)$/i, '').replace(/_(ocr|transcript|classification)$/i, '');
+  const chip = el('span', 'cite', short);
+  chip.title = source;
+  return chip;
+}
+
+function renderInline(parent, text) {
+  let last = 0;
+  for (const m of text.matchAll(INLINE_RE)) {
+    if (m.index > last) parent.appendChild(document.createTextNode(text.slice(last, m.index)));
+    if (m[3] !== undefined) parent.appendChild(el('strong', null, m[3]));
+    else parent.appendChild(citeChip((m[1] || m[2]).trim()));
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function renderAnswer(container, text) {
+  let list = null;
+  for (const raw of String(text || '').replace(/\r/g, '').split('\n')) {
+    const line = raw.trimEnd();
+    const item = line.match(/^\s*(?:[-*•]|(\d+)[.)])\s+(.*)$/);
+    if (item) {
+      const tag = item[1] ? 'OL' : 'UL';
+      if (!list || list.tagName !== tag) list = container.appendChild(el(tag.toLowerCase()));
+      const li = el('li');
+      renderInline(li, item[2]);
+      list.appendChild(li);
+      continue;
+    }
+    list = null;
+    if (!line.trim()) continue;
+    const heading = line.match(/^#{1,4}\s+(.*)$/);
+    const block = el(heading ? 'h3' : 'p');
+    renderInline(block, heading ? heading[1] : line);
+    container.appendChild(block);
   }
 }
 
-function fillQuestion(el) {
-  document.getElementById('questionInput').value = el.textContent;
-  document.getElementById('questionInput').focus();
-}
+// ---------- Messages ----------
+function addUser(text) { append(el('div', 'msg-user', text)); }
 
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
-}
-
-function addMessage(role, content, tools) {
-  const empty = document.getElementById('emptyState');
-  if (empty) empty.remove();
-
-  const chat = document.getElementById('chatArea');
-  const div = document.createElement('div');
-  div.className = 'message ' + role;
-
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar ' + role;
-  avatar.textContent = role === 'ai' ? 'AI' : 'You';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.innerHTML = content.replace(/\n/g, '<br>');
-
-  if (tools && tools.length) {
-    const badges = document.createElement('div');
-    badges.className = 'tools-badge';
-    tools.forEach(t => {
-      const b = document.createElement('span');
-      b.className = 'badge ' + t;
-      b.textContent = t.toUpperCase();
-      badges.appendChild(b);
-    });
-    bubble.appendChild(badges);
-  }
-
-  div.appendChild(avatar);
-  div.appendChild(bubble);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
+function addNote(kind, text) { return append(el('div', 'note ' + kind, text)); }
+function setNote(node, kind, text) { node.className = 'note ' + kind; node.textContent = text; }
 
 function addThinking() {
-  const empty = document.getElementById('emptyState');
-  if (empty) empty.remove();
-
-  const chat = document.getElementById('chatArea');
-  const div = document.createElement('div');
-  div.className = 'message ai';
-  div.id = 'thinking';
-
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar ai';
-  avatar.textContent = 'AI';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble thinking';
-  bubble.innerHTML = '<div class="dot-pulse"><span></span><span></span><span></span></div>';
-
-  div.appendChild(avatar);
-  div.appendChild(bubble);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  const box = el('div', 'thinking');
+  const dots = el('span', 'pulse');
+  for (let i = 0; i < 3; i++) dots.appendChild(el('span'));
+  const label = el('span', null, 'Reading sources…');
+  box.append(dots, label);
+  append(box);
+  const t0 = Date.now();
+  const timer = setInterval(() => {
+    label.textContent = `Reading sources… ${Math.round((Date.now() - t0) / 1000)} s`;
+  }, 1000);
+  return { remove() { clearInterval(timer); box.remove(); } };
 }
 
-async function sendQuestion() {
-  const input = document.getElementById('questionInput');
-  const q = input.value.trim();
-  if (!q) return;
+function addAnswer(data, seconds) {
+  const card = el('article', 'answer');
+  renderAnswer(card, data.answer);
 
+  const meta = el('div', 'meta');
+  for (const t of data.tools_used || []) meta.appendChild(el('span', 'tool', TOOL_LABELS[t] || t));
+  meta.appendChild(el('span', null, `${seconds.toFixed(1)} s`));
+  meta.appendChild(el('span', 'spacer'));
+
+  const copy = el('button', null, 'Copy');
+  copy.type = 'button';
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(data.answer); copy.textContent = 'Copied'; }
+    catch { copy.textContent = 'Copy failed'; }
+    setTimeout(() => (copy.textContent = 'Copy'), 1500);
+  });
+  meta.appendChild(copy);
+
+  // Feedback buttons appear once the API returns a trace_id (Step 1, Langfuse).
+  if (data.trace_id) {
+    for (const [label, value] of [['Helpful', 1], ['Not helpful', 0]]) {
+      const b = el('button', null, label);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', async () => {
+        meta.querySelectorAll('button[aria-pressed]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+        b.setAttribute('aria-pressed', 'true');
+        try {
+          await fetch(API + '/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trace_id: data.trace_id, value }),
+          });
+        } catch { b.textContent = label + ' (not sent)'; }
+      });
+      meta.appendChild(b);
+    }
+  }
+
+  card.appendChild(meta);
+  append(card);
+}
+
+// ---------- Chat ----------
+async function sendQuestion(text) {
+  const q = (text ?? input.value).trim();
+  if (!q || busy) return;
+  busy = true;
+  sendBtn.disabled = true;
   input.value = '';
-  document.getElementById('sendBtn').disabled = true;
-  addMessage('user', q);
-  addThinking();
+  autosize();
+  addUser(q);
+  const thinking = addThinking();
+  const t0 = performance.now();
 
   try {
     const r = await fetch(API + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q })
+      body: JSON.stringify({ question: q }),
     });
-
-    const data = await r.json();
-    document.getElementById('thinking')?.remove();
-
-    if (r.ok) {
-      addMessage('ai', data.answer, data.tools_used);
-    } else {
-      addMessage('ai', 'Error: ' + (data.detail || 'Something went wrong.'));
-    }
-  } catch (e) {
-    document.getElementById('thinking')?.remove();
-    addMessage('ai', 'Could not reach the API. Make sure the server is running at localhost:8000.');
+    const data = await r.json().catch(() => ({}));
+    thinking.remove();
+    if (r.ok) addAnswer(data, (performance.now() - t0) / 1000);
+    else addNote('error', `The question failed: ${detailText(data, r.status)}`);
+  } catch {
+    thinking.remove();
+    addNote('error', 'Can’t reach the ClinAssist server. Start it with: uv run uvicorn api.main:app --port 8000');
   }
 
-  document.getElementById('sendBtn').disabled = false;
-  document.getElementById('questionInput').focus();
+  busy = false;
+  sendBtn.disabled = false;
+  input.focus();
 }
 
-async function uploadFile(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const status = document.getElementById('uploadStatus');
-  status.style.display = 'block';
-  status.textContent = 'Uploading…';
-  status.style.color = '#888';
-
+// ---------- Uploads ----------
+async function upload(file) {
+  const note = addNote('', `Adding ${file.name}…`);
   const form = new FormData();
   form.append('file', file);
-
   try {
     const r = await fetch(API + '/ingest', { method: 'POST', body: form });
-    const data = await r.json();
-
-    if (r.ok) {
-      status.textContent = `✓ ${data.chunks_added} chunks ingested`;
-      status.style.color = '#4ade80';
-    } else {
-      status.textContent = 'Upload failed';
-      status.style.color = '#ef4444';
-    }
+    const data = await r.json().catch(() => ({}));
+    if (r.ok) setNote(note, 'ok', `Added ${data.filename}: ${data.chunks_added} chunks. ${data.message}.`);
+    else setNote(note, 'error', `Couldn’t add ${file.name}: ${detailText(data, r.status)}`);
   } catch {
-    status.textContent = 'Could not reach API';
-    status.style.color = '#ef4444';
+    setNote(note, 'error', `Couldn’t add ${file.name}: the server isn’t reachable.`);
   }
-
-  setTimeout(() => { status.style.display = 'none'; input.value = ''; }, 3000);
 }
 
+// ---------- Health ----------
+async function checkHealth() {
+  const box = document.getElementById('status');
+  const text = document.getElementById('statusText');
+  try {
+    const r = await fetch(API + '/health');
+    if (!r.ok) throw new Error();
+    box.className = 'status online';
+    text.textContent = 'Online';
+  } catch {
+    box.className = 'status offline';
+    text.textContent = 'Server offline';
+  }
+}
+
+// ---------- Wiring ----------
+function autosize() {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+}
+
+input.addEventListener('input', autosize);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
+});
+sendBtn.addEventListener('click', () => sendQuestion());
+
+document.querySelectorAll('.suggestions button').forEach(b =>
+  b.addEventListener('click', () => sendQuestion(b.textContent))
+);
+
+document.getElementById('attachBtn').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  [...fileInput.files].forEach(upload);
+  fileInput.value = '';
+});
+
+let dragDepth = 0;
+window.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
+window.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove('dragging');
+  [...(e.dataTransfer?.files || [])].forEach(upload);
+});
+
 checkHealth();
-setInterval(checkHealth, 10000);
+setInterval(checkHealth, 15000);
+input.focus();
 </script>
 </body>
 </html>

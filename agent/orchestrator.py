@@ -12,7 +12,6 @@ Usage:
 """
 
 import sys
-import os
 from pathlib import Path
 from typing import TypedDict, Annotated
 import operator
@@ -24,8 +23,6 @@ from knowledge_base.resources import get_collection
 from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
 
-import chromadb
-from chromadb.utils import embedding_functions
 
 ROOT = Path(__file__).parent.parent
 PROCESSED_DIR = settings.processed_dir         
@@ -65,9 +62,6 @@ def tool_rag(question: str) -> str:
 
 def tool_cv(image_path: str = None) -> str:
     """Run CV classifier on the most recent image in data/processed/ if no path given."""
-    import torch
-    from PIL import Image
-    from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 
     # Find the most recent classification result already saved
     classification_files = list(PROCESSED_DIR.glob("*_classification.txt"))

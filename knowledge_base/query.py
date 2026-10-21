@@ -12,10 +12,7 @@ Usage:
 """
 
 import sys
-import os
 
-import chromadb
-from chromadb.utils import embedding_functions
 from groq import Groq
 from config import settings
 from knowledge_base.resources import get_collection

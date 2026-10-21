@@ -13,7 +13,6 @@ Usage:
 """
 
 import sys
-import os
 from pathlib import Path
 from PIL import Image
 import torch
