@@ -1,0 +1,1 @@
+{"time": "2026-10-21T15:21:13", "commit": "62dc4b2", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.24, "hit@4": 0.52, "hit@10": 0.8, "mrr": 0.401, "n": 25}
