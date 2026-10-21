@@ -41,6 +41,15 @@ from chromadb.utils import embedding_functions
 import uuid as _uuid
 from knowledge_base.ingest import index_document
 
+from contextlib import asynccontextmanager
+from knowledge_base.resources import get_collection
+
+@asynccontextmanager
+async def lifespan(app):
+    print("Warming up models...")
+    get_collection()           # embedder + DB, loaded once
+    yield
+
 
 # ─────────────────────────────────────────
 # CONFIG
@@ -57,11 +66,7 @@ SUPPORTED_EXTENSIONS = {
     ".mp3", ".wav", ".m4a",   # triggers ASR
 }
 
-app = FastAPI(
-    title="ClinAssist API",
-    description="Clinical AI assistant — RAG + OCR + ASR + CV + Agent orchestration",
-    version="1.0.0",
-)
+app = FastAPI(title="ClinAssist API", lifespan=lifespan)   # keep your existing title/args, add lifespan
 
 # Allow all origins for local dev — restrict this in production
 app.add_middleware(
@@ -194,7 +199,7 @@ def chat(request: ChatRequest):
 
 
 @app.post("/ingest", response_model=IngestResponse)
-async def ingest(file: UploadFile = File(...)):
+def ingest(file: UploadFile = File(...)):
     """
     Upload a file (PDF, image, audio, txt).
     The API automatically extracts text and ingests it into the knowledge base.
