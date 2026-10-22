@@ -48,6 +48,8 @@ def main():
                 "question": it["question"],
                 "answer": result["final_answer"],
                 "tools": result["tools_needed"],
+                "context": result.get("rag_context", ""),          # 
+                "tool_outputs": result.get("tool_outputs", []),
                 "seconds": secs,
                 "model": settings.llm_model,
                 "commit": GIT_COMMIT,
