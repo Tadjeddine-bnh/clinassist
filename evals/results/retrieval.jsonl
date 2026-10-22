@@ -1,2 +1,15 @@
 {"time": "2026-10-21T15:21:13", "commit": "62dc4b2", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.24, "hit@4": 0.52, "hit@10": 0.8, "mrr": 0.401, "n": 25}
 {"time": "2026-10-22T13:51:48", "commit": "11e7815", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.84, "mrr": 0.539, "n": 25}
+{"time": "2026-10-22T14:02:25", "commit": "4dc4835", "chunk_size": 400, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.28, "hit@4": 0.52, "hit@10": 0.84, "mrr": 0.423, "n": 25}
+{"time": "2026-10-22T14:06:14", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.531, "n": 25}
+{"time": "2026-10-22T14:21:18", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.64, "hit@10": 0.8, "mrr": 0.54, "n": 25}
+{"time": "2026-10-22T14:24:27", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.534, "n": 25}
+{"time": "2026-10-22T14:28:51", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.534, "n": 25}
+{"time": "2026-10-22T14:29:09", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.534, "n": 25}
+{"time": "2026-10-22T14:30:06", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.48, "hit@4": 0.68, "hit@10": 0.84, "mrr": 0.584, "n": 25}
+{"time": "2026-10-22T14:31:30", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.48, "hit@4": 0.64, "hit@10": 0.8, "mrr": 0.574, "n": 25}
+{"time": "2026-10-22T14:32:58", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.534, "n": 25}
+{"time": "2026-10-22T20:22:56", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.36, "hit@4": 0.76, "hit@10": 0.8, "mrr": 0.534, "n": 25}
+{"time": "2026-10-22T20:23:49", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.68, "hit@10": 0.84, "mrr": 0.55, "n": 25}
+{"time": "2026-10-22T20:36:53", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.72, "hit@10": 0.8, "mrr": 0.567, "n": 25}
+{"time": "2026-10-22T20:43:11", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.72, "hit@10": 0.8, "mrr": 0.561, "n": 25}

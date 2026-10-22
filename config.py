@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     collection_name: str = "clinical_kb"
     raw_dir: Path = BASE_DIR / "data" / "raw"
     processed_dir: Path = BASE_DIR / "data" / "processed"
-
+    embed_max_tokens: int = 128 
     chunk_size: int = 800
     chunk_overlap: int = 150
     top_k: int = 4
@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_base_url: str = "https://cloud.langfuse.com"
+    rerank_model: str = ""          # empty = reranker off
+    rerank_candidates: int = 20     # how many results the reranker re-sorts
+    hybrid: bool = False            # True = add keyword search (BM25) to meaning search
 
 settings = Settings()
 

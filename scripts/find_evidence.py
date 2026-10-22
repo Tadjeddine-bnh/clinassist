@@ -10,4 +10,4 @@ hits = [(d, m) for d, m in zip(data["documents"], data["metadatas"])
 print(f"{len(hits)} chunks contain all of {words}")
 for doc, m in hits[:8]:
     i = doc.lower().find(words[0])
-    print(f"- {m['source'][:40]} #{m['chunk_index']}: ...{doc[max(0, i - 80): i + 160]}...")
+    print(f"- {m['source'][:40]} p.{m.get('page', '-')} #{m['chunk_index']}: ...{doc[max(0, i - 80): i + 160]}...")

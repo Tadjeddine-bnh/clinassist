@@ -4,7 +4,7 @@
 {"id": "who-04", "category": "guideline", "question": "Should children with diarrhoea get zinc, and for how long?", "evidence": ["zinc supplement"], "must_contain": ["zinc"]}
 {"id": "who-05", "category": "guideline", "question": "Which emergency signs mean a child needs immediate treatment at triage?", "evidence": ["obstructed or absent breathing"], "must_contain": ["breathing"]}
 {"id": "who-06", "category": "guideline", "question": "What blood glucose level counts as hypoglycaemia in a sick child and how do I treat it?", "evidence": ["2.5 mmol"], "must_contain": ["glucose"]}
-{"id": "who-07", "category": "guideline", "question": "Which sign on chest examination suggests pneumonia in a young child?", "evidence": ["In favour Pneumonia", "Cough with fast breathing"], "must_contain": ["indrawing"]}
+{"id": "who-07", "category": "guideline", "question": "Which sign on chest examination suggests pneumonia in a young child?", "evidence": ["Cough with fast breathing"], "must_contain": ["indrawing"]}
 {"id": "who-08", "category": "guideline", "question": "What is the first-line treatment for severe malaria in children?", "evidence": ["artesunate"], "must_contain": ["artesunate"]}
 {"id": "who-09", "category": "guideline", "question": "What mid-upper arm circumference indicates severe acute malnutrition?", "evidence": ["115 mm"], "must_contain": ["115"]}
 {"id": "who-10", "category": "guideline", "question": "What formula should I start feeding a child with severe acute malnutrition?", "evidence": ["F-75"], "must_contain": ["F-75"]}
@@ -16,7 +16,7 @@
 {"id": "ar-01", "category": "guideline_arabic", "question": "ما هي علامات الجفاف الشديد عند الأطفال؟", "evidence": ["two signs or symptoms of severe dehydration"], "must_contain": []}
 {"id": "ar-02", "category": "guideline_arabic", "question": "كيف أعالج طفلاً يعاني من سوء التغذية الحاد الشديد؟", "evidence": ["F-75"], "must_contain": []}
 {"id": "doc-01", "category": "document", "question": "How did the patient's lactate change during the hospital stay?", "evidence": ["serum lactate had normalized"], "must_contain": ["normal"]}
-{"id": "doc-02", "category": "document", "question": "What was the patient's ALT result?", "evidence": ["ALT 14-Oct-2015"], "must_contain": ["90"]}
+{"id": "doc-02", "category": "document", "question": "What was the patient's ALT result?", "evidence": ["ALT|14-Oct-2015|90"], "must_contain": ["90"]}
 {"id": "doc-03", "category": "document", "question": "Which doctor is the discharge summary addressed to?", "evidence": ["Dear Dr. Jay"], "must_contain": ["Jay"]}
 {"id": "doc-04", "category": "document", "question": "What is the patient's medical history in the check-up report?", "evidence": ["Hypertension, start 2015"], "must_contain": ["hypertension", "appendectomy"]}
 {"id": "doc-05", "category": "document", "question": "What is the patient's date of birth in the check-up report?", "evidence": ["1975-04-30"], "must_contain": ["1975-04-30"], "note": "OCR swapped DOB and Age; the answer may say 50"}

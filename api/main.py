@@ -49,6 +49,7 @@ from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from config import settings, GIT_COMMIT
 from typing import Literal
+from knowledge_base.ingest import index_document, index_pages, read_pdf_pages, read_txt
 @asynccontextmanager
 async def lifespan(app):
     print("Warming up models...")
@@ -116,9 +117,8 @@ def process_uploaded_file(file_path: Path) -> tuple[str, int]:
 
     # Direct text ingestion
     if suffix == ".pdf":
-        text = read_pdf(file_path)
-        chunks = ingest_text(text, file_path.name)
-        return f"PDF ingested directly", chunks
+        _, chunks = index_pages(read_pdf_pages(file_path), file_path.name)
+        return "PDF ingested", chunks
 
     if suffix == ".txt":
         text = read_txt(file_path)
