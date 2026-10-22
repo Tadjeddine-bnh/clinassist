@@ -2,16 +2,32 @@ import hashlib
 from pathlib import Path
 
 from pypdf import PdfReader
+import re
+import unicodedata
 
 from config import settings
 from knowledge_base.resources import get_collection
 
 DATA_DIRS = [settings.raw_dir, settings.processed_dir]
 
+def clean_text(text: str) -> str:
+    """Repair common PDF extraction damage before chunking."""
+    # 1. "ﬁ rst" -> "first": ligature characters followed by a stray space
+    text = re.sub(r"([\ufb00-\ufb04])\s+(?=[a-z])", r"\1", text)
+    text = unicodedata.normalize("NFKC", text)               # ﬁ -> fi, odd spaces -> normal
+    # 2. bullet symbols the PDF turned into codes like /L50776
+    text = re.sub(r"/L\d{4,6}", " - ", text)
+    # 3. page headers/footers: "PB2_ch5.indd 134" and "5/06/13 10:06 AM"
+    text = re.sub(r"PB2_\S+?\.indd \d+", " ", text)
+    text = re.sub(r"\d{1,2}/\d{2}/\d{2} \d{1,2}:\d{2} [AP]M", " ", text)
+    # 4. letter-spaced words: "F e v e r" -> "Fever"
+    text = re.sub(r"\b(?:[A-Za-z] ){3,}[A-Za-z]\b", lambda m: m.group(0).replace(" ", ""), text)
+    return text
+
 
 def read_pdf(path: Path) -> str:
     reader = PdfReader(str(path))
-    return "\n".join(page.extract_text() or "" for page in reader.pages)
+    return clean_text("\n".join(page.extract_text() or "" for page in reader.pages))
 
 
 def read_txt(path: Path) -> str:
