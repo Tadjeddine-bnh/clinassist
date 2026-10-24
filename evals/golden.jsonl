@@ -1,6 +1,6 @@
 {"id": "who-01", "category": "guideline", "question": "What are the signs of severe dehydration in children?", "evidence": ["two signs or symptoms of severe dehydration"], "must_contain": ["sunken eyes"]}
 {"id": "who-02", "category": "guideline", "question": "How much IV fluid do I give a child with severe dehydration?", "evidence": ["100 ml/kg"], "must_contain": ["100 ml/kg"]}
-{"id": "who-03", "category": "guideline", "question": "How much ORS should a child with some dehydration get in the first 4 hours?", "evidence": ["some dehydration should be given ORS solution", "Determine amount of ORS to give"], "must_contain": ["200-400"]}
+{"id": "who-03", "category": "guideline", "question": "How much ORS should a child with some dehydration get in the first 4 hours?","evidence": ["1400 ml"], "must_contain": ["200-400"]}
 {"id": "who-04", "category": "guideline", "question": "Should children with diarrhoea get zinc, and for how long?", "evidence": ["zinc supplement"], "must_contain": ["zinc"]}
 {"id": "who-05", "category": "guideline", "question": "Which emergency signs mean a child needs immediate treatment at triage?", "evidence": ["obstructed or absent breathing"], "must_contain": ["breathing"]}
 {"id": "who-06", "category": "guideline", "question": "What blood glucose level counts as hypoglycaemia in a sick child and how do I treat it?", "evidence": ["2.5 mmol"], "must_contain": ["glucose"]}

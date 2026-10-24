@@ -13,3 +13,6 @@
 {"time": "2026-10-22T20:23:49", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.68, "hit@10": 0.84, "mrr": 0.55, "n": 25}
 {"time": "2026-10-22T20:36:53", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.72, "hit@10": 0.8, "mrr": 0.567, "n": 25}
 {"time": "2026-10-22T20:43:11", "commit": "4dc4835", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.72, "hit@10": 0.8, "mrr": 0.561, "n": 25}
+{"time": "2026-10-24T13:21:31", "commit": "ba63b4c", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.68, "hit@10": 0.76, "mrr": 0.557, "n": 25}
+{"time": "2026-10-24T13:30:24", "commit": "ba63b4c", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.24, "hit@4": 0.56, "hit@10": 0.68, "mrr": 0.398, "n": 25}
+{"time": "2026-10-24T13:39:55", "commit": "ba63b4c", "chunk_size": 800, "top_k": 4, "embed_model": "paraphrase-multilingual-mpnet-base-v2", "hit@1": 0.44, "hit@4": 0.68, "hit@10": 0.76, "mrr": 0.557, "n": 25}

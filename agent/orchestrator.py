@@ -23,7 +23,8 @@ from knowledge_base.resources import get_collection
 from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
 from langfuse import get_client
-
+from config import settings
+from knowledge_base.resources import search
 ROOT = Path(__file__).parent.parent
 PROCESSED_DIR = settings.processed_dir         
 DB_DIR = settings.chroma_dir                    
@@ -49,25 +50,21 @@ class AgentState(TypedDict):
 # calls them as needed — they don't know
 # about the agent, the agent knows about them.
 # ─────────────────────────────────────────
-
 def tool_rag(question: str) -> str:
-    """Retrieve relevant chunks from the clinical knowledge base."""
-    collection = get_collection()
+    """Retrieve relevant chunks with the same search() the evals measure."""
     with get_client().start_as_current_observation(as_type="span", name="retrieval") as span:
-        results = collection.query(
-            query_texts=[question], n_results=settings.top_k,
-            include=["documents", "metadatas", "distances"],
-        )
+        results = search(question, k=settings.top_k)
         span.update(
             input={"question": question, "top_k": settings.top_k},
             output=[
-                {"source": m["source"], "chunk": m["chunk_index"], "distance": round(d, 3), "preview": doc[:150]}
-                for doc, m, d in zip(results["documents"][0], results["metadatas"][0], results["distances"][0])
+                {"source": m["source"], "page": m.get("page"), "chunk": m["chunk_index"], "preview": doc[:150]}
+                for doc, m in results
             ],
         )
     chunks = []
-    for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
-        chunks.append(f"[source: {meta['source']}]\n{doc}")
+    for doc, meta in results:
+        label = f"{meta['source']}, p. {meta['page']}" if "page" in meta else meta["source"]
+        chunks.append(f"[source: {label}]\n{doc}")
     return "\n\n".join(chunks)
 
 
@@ -177,8 +174,16 @@ def node_answer_generator(state: AgentState) -> AgentState:
     tool_section = "\n\n".join(state["tool_outputs"]) if state["tool_outputs"] else ""
 
     prompt = f"""You are a clinical AI assistant. Answer the clinician's question using
-ONLY the provided context below. Cite every factual claim with its source.
-If the context doesn't contain the answer, say so explicitly — never guess.
+ONLY the provided context below. If the context doesn't contain the answer, say so explicitly — never guess.
+
+Citations:
+- Each context passage starts with a label like [source: file.pdf, p. 159].
+- After every factual claim, copy the label of the passage it came from, exactly as written.
+- Never write a page number that is not in a label.
+
+Tables:
+- Some passages contain tables written as |cell|cell|. Read which row and column each value is in,
+  and copy numbers exactly as they appear. Never estimate or invent a value the table doesn't show.
 
 === Knowledge Base Context ===
 {state['rag_context']}

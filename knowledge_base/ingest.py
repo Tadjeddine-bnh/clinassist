@@ -38,18 +38,32 @@ def clean_text(text: str) -> str:
 
 
 def read_pdf_pages(path: Path) -> list[tuple[int, str]]:
-    """Return [(page_number, text), ...]. Tables come out as markdown with their rows intact."""
+    """Return [(page_number, text), ...].
+
+    - Normal text stays in PyMuPDF's own order (same as experiment 6).
+    - Tables come out as markdown with their rows intact, after the page text.
+    - Each table is labelled with the text just above it on the page
+      ("Table: Determine amount of ORS..."), so a chunk holding the table still says what it is about.
+    """
     pages = []
     with pymupdf.open(str(path)) as doc:
         for page in doc:
             tables = page.find_tables().tables
             boxes = [pymupdf.Rect(t.bbox) for t in tables]
-            # normal text blocks, skipping the ones inside a table (those come from the table below)
-            text_parts = [
-                block[4] for block in page.get_text("blocks")
+
+            # normal text blocks, skipping the ones inside a table (those come from the table itself)
+            text_blocks = [
+                (pymupdf.Rect(block[:4]), block[4]) for block in page.get_text("blocks")
                 if block[6] == 0 and not any(pymupdf.Rect(block[:4]).intersects(box) for box in boxes)
             ]
-            table_parts = [t.to_markdown() for t in tables]
+            text_parts = [text for _, text in text_blocks]          # original order, unchanged
+
+            table_parts = []
+            for table, box in zip(tables, boxes):
+                above = [(rect.y0, text) for rect, text in text_blocks if rect.y0 < box.y0]
+                heading = " ".join(max(above)[1].split())[-200:] if above else ""   # closest text above
+                table_parts.append(f"Table: {heading}\n{table.to_markdown()}")
+
             pages.append((page.number + 1, clean_text("\n".join(text_parts + table_parts))))
     return pages
 
