@@ -25,7 +25,8 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from config import settings
 from knowledge_base.resources import search
 
-
+from pathlib import Path
+from knowledge_base.ingest import read_pdf
 # ─────────────────────────────────────────
 # TOOLS
 # The docstring is what the LLM reads to decide when to use a tool, so it matters.
@@ -42,8 +43,48 @@ def search_guidelines(query: str) -> str:
         parts.append(f"[source: {label}]\n{doc}")
     return "\n\n".join(parts) or "No passages found."
 
+MAX_CHARS = 8000     # one file can't flood the LLM's context
 
-TOOLS = [search_guidelines]
+
+def _available_files() -> dict[str, Path]:
+    """name -> path, for every file the agent may open. This dictionary is the whitelist."""
+    files = {}
+    for folder in (settings.raw_dir, settings.processed_dir):
+        for p in sorted(folder.glob("*")):
+            if p.suffix.lower() not in {".pdf", ".txt"}:
+                continue
+            if p.name.endswith("_ocr.txt") and (settings.raw_dir / (p.name[:-8] + ".pdf")).exists():
+                continue          # the PDF is already listed, so skip its OCR copy
+            files.setdefault(p.name, p)
+    return files
+
+
+@tool
+def list_files() -> str:
+    """List the files that can be opened with read_file: patient documents, reports,
+    discharge summaries and dictation transcripts. Call this FIRST whenever the question
+    is about a specific document, report, patient file or dictation."""
+    names = sorted(_available_files())
+    if not names:
+        return "No files available."
+    return "Files you can open with read_file:\n" + "\n".join(f"- {n}" for n in names)
+
+
+@tool
+def read_file(file_name: str) -> str:
+    """Read one file in full. file_name must be exactly one of the names returned by list_files.
+    Do not use this for the WHO guideline book: use search_guidelines for that."""
+    files = _available_files()
+    path = files.get(file_name)             # lookup only: never build a path from the LLM's text
+    if path is None:
+        return f"No file named '{file_name}'. Files you can open:\n" + "\n".join(f"- {n}" for n in sorted(files))
+    text = read_pdf(path) if path.suffix.lower() == ".pdf" else path.read_text(encoding="utf-8", errors="ignore")
+    text = " ".join(text.split())
+    note = "\n(Text cut off here.)" if len(text) > MAX_CHARS else ""
+    return f"[source: {file_name}]\n{text[:MAX_CHARS]}{note}"
+
+
+TOOLS = [search_guidelines, list_files, read_file]
 
 
 # ─────────────────────────────────────────
@@ -54,6 +95,11 @@ Always use your tools to find information before answering. Answer ONLY from wha
 If the tools don't give you the answer, say so explicitly. Never guess.
 If a passage mentions a table, chart or treatment plan you need but whose content you don't see,
 search again specifically for it. You can search up to 3 times.
+Files:
+- For questions about a specific document, report, discharge summary or dictation:
+  call list_files, choose the file whose name matches the question, then call read_file with that exact name.
+- If more than one file could match, say which file you used.
+- For general clinical questions, use search_guidelines.
 
 Citations:
 - Every passage from a tool starts with a label like [source: file.pdf, p. 159].
@@ -70,7 +116,7 @@ class State(TypedDict):
     # add_messages means each node's new messages are APPENDED, not replacing the list.
     messages: Annotated[list[AnyMessage], add_messages]
 
-MAX_SEARCHES = 3
+MAX_SEARCHES = 5
 
 llm = ChatGroq(model=settings.llm_model, temperature=0, api_key=settings.groq_api_key)
 llm_with_tools = llm.bind_tools(TOOLS)
