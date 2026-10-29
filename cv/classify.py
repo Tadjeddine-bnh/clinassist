@@ -1,76 +1,54 @@
 """
-Phase 4 — Computer Vision classifier.
+Phase 4: chest X-ray classifier (Vision Transformer fine-tuned on NORMAL vs PNEUMONIA).
 
-Takes a medical image and classifies it using a Vision Transformer (ViT)
-pretrained on chest X-rays. Returns a label + confidence score.
-
-The output is also saved as a .txt in data/processed/ so the agent
-(Phase 5) can read the classification result and factor it into its
-reasoning — same pattern as OCR and ASR outputs.
+classify_image() is used by the agent's classify_xray tool.
+Running this file directly classifies one image and prints the result.
 
 Usage:
-    python classify.py path\\to\\image.jpg
+    uv run python -m cv.classify data\raw\pneumo.jpg
 """
-
 import sys
+from functools import lru_cache
 from pathlib import Path
-from PIL import Image
+
 import torch
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+from PIL import Image
+from transformers import AutoImageProcessor, AutoModelForImageClassification
 
-ROOT = Path(__file__).parent.parent
-PROCESSED_DIR = settings.processed_dir
-
-# Pretrained ViT fine-tuned on chest X-rays (normal vs pneumonia)
-# Source: nickmuchi/vit-finetuned-chest-xray-pneumonia on HuggingFace
 MODEL_NAME = "nickmuchi/vit-finetuned-chest-xray-pneumonia"
+
+
+@lru_cache
+def _load():
+    """Load the model once, then reuse it."""
+    processor = AutoImageProcessor.from_pretrained(MODEL_NAME)
+    model = AutoModelForImageClassification.from_pretrained(MODEL_NAME)
+    model.eval()
+    return processor, model
+
+
+def classify_image(path) -> list[tuple[str, float]]:
+    """Return [(label, percent), ...], highest first."""
+    processor, model = _load()
+    image = Image.open(path).convert("RGB")
+    inputs = processor(images=image, return_tensors="pt")
+    with torch.no_grad():
+        probs = torch.softmax(model(**inputs).logits, dim=-1)[0]
+    results = [(model.config.id2label[i], round(probs[i].item() * 100, 2)) for i in range(len(probs))]
+    return sorted(results, key=lambda r: r[1], reverse=True)
 
 
 def main():
     if len(sys.argv) < 2:
-        print('Usage: python classify.py path\\to\\image.jpg')
+        print("Usage: uv run python -m cv.classify path\\to\\image.jpg")
         return
-
-    input_path = Path(sys.argv[1])
-    if not input_path.exists():
-        print(f"File not found: {input_path}")
+    path = Path(sys.argv[1])
+    if not path.exists():
+        print(f"File not found: {path}")
         return
-
-    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-
-    print(f"Loading model ({MODEL_NAME})...")
-    extractor = AutoFeatureExtractor.from_pretrained(MODEL_NAME)
-    model = AutoModelForImageClassification.from_pretrained(MODEL_NAME)
-    model.eval()
-
-    image = Image.open(input_path).convert("RGB")
-    inputs = extractor(images=image, return_tensors="pt")
-
-    with torch.no_grad():
-        outputs = model(**inputs)
-        probs = torch.softmax(outputs.logits, dim=-1)[0]
-
-    labels = model.config.id2label
-    results = [(labels[i], round(probs[i].item() * 100, 2)) for i in range(len(labels))]
-    results.sort(key=lambda x: x[1], reverse=True)
-
-    print(f"\n--- Classification results for {input_path.name} ---")
-    for label, confidence in results:
+    print(f"--- Classification results for {path.name} ---")
+    for label, confidence in classify_image(path):
         print(f"  {label}: {confidence}%")
-
-    top_label, top_conf = results[0]
-    summary = (
-        f"Image: {input_path.name}\n"
-        f"Classification: {top_label}\n"
-        f"Confidence: {top_conf}%\n"
-        f"All scores: {', '.join(f'{l}: {c}%' for l, c in results)}\n"
-    )
-
-    output_path = PROCESSED_DIR / (input_path.stem + "_classification.txt")
-    output_path.write_text(summary, encoding="utf-8")
-
-    print(f"\nSaved to: {output_path}")
-    print(f"Next step: re-run knowledge_base\\ingest.py to make this queryable.")
 
 
 if __name__ == "__main__":

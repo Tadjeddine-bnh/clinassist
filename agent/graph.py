@@ -83,8 +83,44 @@ def read_file(file_name: str) -> str:
     note = "\n(Text cut off here.)" if len(text) > MAX_CHARS else ""
     return f"[source: {file_name}]\n{text[:MAX_CHARS]}{note}"
 
+IMAGE_EXTS = {".jpg", ".jpeg", ".png"}
 
-TOOLS = [search_guidelines, list_files, read_file]
+XRAY_LIMITS = (
+    "LIMITS: this model only separates NORMAL from PNEUMONIA, and it was trained on children's chest X-rays. "
+    "It cannot detect tuberculosis or any other condition, and it is not validated for clinical use. "
+    "A NORMAL result does NOT mean the X-ray has no abnormality. "
+    "If the image is not a chest X-ray, ignore the result."
+)
+
+
+def _available_images() -> dict[str, Path]:
+    """name -> path for every image the agent may analyse. Also a whitelist."""
+    return {p.name: p for p in sorted(settings.raw_dir.glob("*")) if p.suffix.lower() in IMAGE_EXTS}
+
+
+@tool
+def list_images() -> str:
+    """List the image files that can be analysed with classify_xray (X-rays, scans, photos).
+    Call this FIRST whenever the question is about an X-ray or a medical image."""
+    names = sorted(_available_images())
+    if not names:
+        return "No images available."
+    return "Images you can analyse with classify_xray:\n" + "\n".join(f"- {n}" for n in names)
+
+
+@tool
+def classify_xray(file_name: str) -> str:
+    """Run the chest X-ray classifier on ONE image. file_name must be exactly one of the names
+    returned by list_images. Only use it for chest X-rays, not for photos of documents."""
+    path = _available_images().get(file_name)      # lookup only, same safety rule as read_file
+    if path is None:
+        return f"No image named '{file_name}'. Images you can analyse:\n" + "\n".join(f"- {n}" for n in sorted(_available_images()))
+    from cv.classify import classify_image         # imported here so the API starts fast
+    scores = "\n".join(f"{label}: {pct}%" for label, pct in classify_image(path))
+    return f"[source: X-ray classifier on {file_name}]\n{scores}\n\n{XRAY_LIMITS}"
+
+
+TOOLS = [search_guidelines, list_files, read_file, list_images, classify_xray]
 
 
 # ─────────────────────────────────────────
@@ -100,6 +136,12 @@ Files:
   call list_files, choose the file whose name matches the question, then call read_file with that exact name.
 - If more than one file could match, say which file you used.
 - For general clinical questions, use search_guidelines.
+
+X-rays:
+- For questions about an X-ray or medical image: call list_images, choose the image whose name matches the question,
+  then call classify_xray with that exact name. Say which image you analysed.
+- Always tell the clinician the classifier's limits (the LIMITS paragraph in its result).
+- Never say a disease is present or absent unless it is one of the classifier's two labels.
 
 Citations:
 - Every passage from a tool starts with a label like [source: file.pdf, p. 159].
@@ -138,6 +180,8 @@ Question: {question}
 
 Answer:"""
     return llm.invoke(prompt)
+
+
 
 
 def agent(state: State) -> dict:
