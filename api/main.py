@@ -29,7 +29,10 @@ from knowledge_base.resources import get_whisper
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
-from agent.orchestrator import build_graph
+from langchain_core.messages import HumanMessage
+from langgraph.errors import GraphRecursionError
+
+from agent.graph import build_graph
 from knowledge_base.ingest import read_pdf, read_txt
 
 from knowledge_base.ingest import index_document
@@ -40,8 +43,7 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 
-from config import settings
-from agent.orchestrator import build_graph
+from config import settings 
 from knowledge_base.ingest import index_document, read_pdf, read_txt
 from knowledge_base.resources import get_collection, get_whisper
 from ocr.extract import extract_text
@@ -160,6 +162,9 @@ def health():
     return {"status": "ok", "service": "ClinAssist API"}
 
 
+HELPER_TOOLS = {"list_files", "list_images"}   # menus, not worth showing as "tools used"
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     q = request.question.strip()
@@ -170,7 +175,7 @@ def chat(request: ChatRequest):
     with langfuse.start_as_current_observation(as_type="span", name="chat") as span:
         span.update(
             input={"question": q},
-            metadata={                      # the settings that produced this answer
+            metadata={
                 "llm_model": settings.llm_model,
                 "embed_model": settings.embed_model,
                 "top_k": settings.top_k,
@@ -179,19 +184,24 @@ def chat(request: ChatRequest):
             },
         )
         with propagate_attributes(tags=["api"]):
-            handler = CallbackHandler()     # one per request, so trace IDs never mix
-            result = agent.invoke(
-                {"question": q, "tools_needed": [], "rag_context": "",
-                 "tool_outputs": [], "final_answer": ""},
-                config={"callbacks": [handler]},
-            )
-        span.update(output={"answer": result["final_answer"], "tools": result["tools_needed"]})
+            handler = CallbackHandler()
+            try:
+                result = agent.invoke(
+                    {"messages": [HumanMessage(q)]},
+                    config={"recursion_limit": 14, "callbacks": [handler]},
+                )
+            except GraphRecursionError:
+                raise HTTPException(status_code=500, detail="The assistant took too many steps. Please rephrase the question.")
+
+        messages = result["messages"]
+        answer = messages[-1].content                      # the last message is the final answer
+        tools_used = list(dict.fromkeys(                   # tool names, in order, no duplicates
+            m.name for m in messages if m.type == "tool" and m.name not in HELPER_TOOLS
+        ))
+        span.update(output={"answer": answer, "tools": tools_used})
         trace_id = handler.last_trace_id
 
-    return ChatResponse(question=q, answer=result["final_answer"],
-                        tools_used=result["tools_needed"], trace_id=trace_id)
-    
-    
+    return ChatResponse(question=q, answer=answer, tools_used=tools_used, trace_id=trace_id)  
     
 @app.post("/feedback")
 def feedback(req: FeedbackRequest):
