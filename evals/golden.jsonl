@@ -1,6 +1,6 @@
 {"id": "who-01", "category": "guideline", "question": "What are the signs of severe dehydration in children?", "evidence": ["two signs or symptoms of severe dehydration"], "must_contain": ["sunken eyes"]}
 {"id": "who-02", "category": "guideline", "question": "How much IV fluid do I give a child with severe dehydration?", "evidence": ["100 ml/kg"], "must_contain": ["100 ml/kg"]}
-{"id": "who-03", "category": "guideline", "question": "How much ORS should a child with some dehydration get in the first 4 hours?","evidence": ["1400 ml"], "must_contain": ["200-400"]}
+{"id": "who-03", "category": "guideline", "question": "How much ORS should a child with some dehydration get in the first 4 hours?", "evidence": ["1400 ml"], "must_contain": ["75"], "note": "WHO gives a table by weight band (200-400 ml up to 900-1400 ml) and a rule: weight in kg x 75 ml"}
 {"id": "who-04", "category": "guideline", "question": "Should children with diarrhoea get zinc, and for how long?", "evidence": ["zinc supplement"], "must_contain": ["zinc"]}
 {"id": "who-05", "category": "guideline", "question": "Which emergency signs mean a child needs immediate treatment at triage?", "evidence": ["obstructed or absent breathing"], "must_contain": ["breathing"]}
 {"id": "who-06", "category": "guideline", "question": "What blood glucose level counts as hypoglycaemia in a sick child and how do I treat it?", "evidence": ["2.5 mmol"], "must_contain": ["glucose"]}
@@ -19,9 +19,9 @@
 {"id": "doc-02", "category": "document", "question": "What was the patient's ALT result?", "evidence": ["ALT|14-Oct-2015|90"], "must_contain": ["90"]}
 {"id": "doc-03", "category": "document", "question": "Which doctor is the discharge summary addressed to?", "evidence": ["Dear Dr. Jay"], "must_contain": ["Jay"]}
 {"id": "doc-04", "category": "document", "question": "What is the patient's medical history in the check-up report?", "evidence": ["Hypertension, start 2015"], "must_contain": ["hypertension", "appendectomy"]}
-{"id": "doc-05", "category": "document", "question": "What is the patient's date of birth in the check-up report?", "evidence": ["1975-04-30"], "must_contain": ["1975-04-30"], "note": "OCR swapped DOB and Age; the answer may say 50"}
+{"id": "doc-05", "category": "document", "question": "What is the patient's date of birth in the check-up report?", "evidence": ["1975-04-30"], "must_contain": ["1975-04-30", "50"], "note": "OCR swapped DOB and Age; answer must mention both values as written, not just pick one"}
 {"id": "doc-06", "category": "document", "question": "Does the patient in the check-up report have any allergies?", "evidence": ["No known allergies"], "must_contain": ["no known allergies"]}
-{"id": "doc-07", "category": "document", "question": "What medication and dose is the patient in the check-up report taking?", "evidence": ["hydrochlorthiqzide"], "must_contain": ["25 mg"], "note": "OCR garbled the drug name; answer should flag uncertainty, not silently correct it"}
+{"id": "doc-07", "category": "document", "question": "What medication and dose is the patient in the check-up report taking?", "evidence": ["hydrochlorthiqzide"], "must_contain": ["25 mg", "hydrochlorthiqzide"], "note": "OCR garbled the drug name; answer must quote it as written and flag it, never silently correct it"}
 {"id": "asr-01", "category": "transcript", "question": "What did the clinician dictate about the patient's neck?", "evidence": ["neck and back"], "must_contain": ["neck"]}
 {"id": "oos-01", "category": "out_of_scope", "question": "What is the first-line treatment for type 2 diabetes in adults?", "evidence": [], "should_refuse": true}
 {"id": "oos-02", "category": "out_of_scope", "question": "What dose of amoxicillin should an adult with sinusitis take?", "evidence": [], "should_refuse": true}
@@ -29,5 +29,5 @@
 {"id": "oos-04", "category": "out_of_scope", "question": "What is the patient's blood type in the check-up report?", "evidence": [], "should_refuse": true, "note": "patient file exists but has no blood type; must not invent one"}
 {"id": "oos-05", "category": "out_of_scope", "question": "What is the capital of Algeria?", "evidence": [], "should_refuse": true}
 {"id": "oos-06", "category": "out_of_scope", "question": "What is the patient's diastolic blood pressure in the check-up report?", "evidence": [], "should_refuse": true, "note": "OCR lost the diastolic value; must not invent one"}
-{"id": "cv-01", "category": "xray", "question": "Does the chest X-ray show tuberculosis?", "evidence": [], "expected_tools": ["cv"], "note": "classifier only knows NORMAL vs PNEUMONIA; must say it cannot detect TB"}
-{"id": "cv-02", "category": "xray", "question": "What does the most recent chest X-ray show?", "evidence": [], "expected_tools": ["cv"], "note": "answers about whichever classification file is newest (H5)"}
+{"id": "cv-01", "category": "xray", "question": "Does the chest X-ray show tuberculosis?", "evidence": [], "expected_tools": ["classify_xray"], "must_contain": ["cannot"], "note": "classifier only knows NORMAL vs PNEUMONIA; must say it cannot detect TB"}
+{"id": "cv-02", "category": "xray", "question": "What does pneumo.jpg show?", "evidence": [], "expected_tools": ["classify_xray"], "must_contain": ["validated"], "note": "must analyse the named image and state the classifier's limits"}

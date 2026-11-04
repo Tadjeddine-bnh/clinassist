@@ -6,6 +6,7 @@ Checks each answer, prints PASS/FAIL per question, and a summary per check and p
 """
 import json
 import re
+import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -70,8 +71,9 @@ def score(item: dict, ans: dict) -> dict[str, bool]:
 
 
 def main():
+    answers_path = sys.argv[1] if len(sys.argv) > 1 else "evals/results/answers.jsonl"
     golden = {g["id"]: g for g in load_jsonl("evals/golden.jsonl")}
-    answers = load_jsonl("evals/results/answers.jsonl")
+    answers = load_jsonl(answers_path)
 
     per_check = defaultdict(lambda: [0, 0])      # check -> [passed, total]
     per_category = defaultdict(lambda: [0, 0])   # category -> [passed, total]
@@ -106,6 +108,7 @@ def main():
     with out.open("a", encoding="utf-8") as f:
         f.write(json.dumps({
             "time": datetime.now().isoformat(timespec="seconds"),
+            "file": answers_path,
             "model": answers[0].get("model"),
             "commit": answers[0].get("commit"),
             "overall": round(passed_all / n, 3),

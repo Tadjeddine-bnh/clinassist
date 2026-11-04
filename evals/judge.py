@@ -25,6 +25,7 @@ Groq free tier: we wait between calls. A full run takes about 7-8 minutes.
 """
 import hashlib
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -148,7 +149,8 @@ def verdict_from(result: dict) -> tuple[str, list[str]]:
 
 def main():
     golden = {g["id"]: g for g in load_jsonl("evals/golden.jsonl")}
-    answers = [a for a in load_jsonl("evals/results/answers.jsonl")
+    answers_path = sys.argv[1] if len(sys.argv) > 1 else "evals/results/answers.jsonl"
+    answers = [a for a in load_jsonl(answers_path)
                if not golden[a["id"]].get("should_refuse")]
     client = Groq(api_key=settings.groq_api_key)
     cache = json.loads(CACHE_FILE.read_text(encoding="utf-8")) if CACHE_FILE.exists() else {}
@@ -187,7 +189,7 @@ def main():
         if n < len(answers) and not from_cache:
             time.sleep(WAIT_BETWEEN_CALLS)
 
-    out = Path("evals/results/judge.jsonl")
+    out = Path(f"evals/results/judge_{Path(answers_path).stem}.jsonl")
     out.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
 
     total = len(rows)

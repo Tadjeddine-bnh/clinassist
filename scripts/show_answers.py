@@ -1,10 +1,15 @@
 import json
 import sys
 
-sys.stdout.reconfigure(encoding="utf-8")   # so Arabic prints correctly in PowerShell
+sys.stdout.reconfigure(encoding="utf-8")
 
-prefixes = tuple(sys.argv[1:]) or ("",)    # e.g. "oos" "cv"; nothing = show all
-for line in open("evals/results/answers.jsonl", encoding="utf-8"):
+args = sys.argv[1:]
+path = "evals/results/answers.jsonl"
+if args and args[0].endswith(".jsonl"):
+    path, args = args[0], args[1:]
+prefixes = tuple(args) or ("",)
+
+for line in open(path, encoding="utf-8"):
     r = json.loads(line)
     if r["id"].startswith(prefixes):
         print(f"\n=== {r['id']}  ({r['seconds']} s, tools={r['tools']})")
