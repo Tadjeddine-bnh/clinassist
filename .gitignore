@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 knowledge_base/chroma_db/
 data/
+node_modules/

@@ -32,7 +32,8 @@ sys.path.insert(0, str(ROOT))
 from langchain_core.messages import HumanMessage
 from langgraph.errors import GraphRecursionError
 
-from agent.graph import build_graph
+from agent.graph import TOOLS, build_graph
+from pydantic import BaseModel, ValidationError
 from knowledge_base.ingest import read_pdf, read_txt
 
 from knowledge_base.ingest import index_document
@@ -208,7 +209,28 @@ def feedback(req: FeedbackRequest):
     get_client().create_score(trace_id=req.trace_id, name="user_feedback",
                               value=req.value, data_type="NUMERIC")
     return {"ok": True}
+# Tools that MCP clients may use. An explicit list, not "everything in TOOLS":
+# a future tool that WRITES data stays invisible here until we choose to add it.
+MCP_TOOL_NAMES = {"search_guidelines", "list_files", "read_file", "list_images", "classify_xray"}
+MCP_TOOLS = {t.name: t for t in TOOLS if t.name in MCP_TOOL_NAMES}
 
+
+class ToolCall(BaseModel):
+    arguments: dict = {}
+
+
+@app.post("/tools/{tool_name}")
+def run_tool(tool_name: str, call: ToolCall):
+    """Run one of the agent's read-only tools. Used by the MCP server."""
+    tool = MCP_TOOLS.get(tool_name)
+    if tool is None:
+        raise HTTPException(status_code=404, detail=f"Unknown tool '{tool_name}'")
+    try:
+        return {"result": tool.invoke(call.arguments)}
+    except ValidationError:
+        raise HTTPException(status_code=422, detail="Bad arguments for this tool")
+    
+    
 @app.post("/ingest", response_model=IngestResponse)
 def ingest(file: UploadFile = File(...)):
     """Upload a file (PDF, image, audio, txt); it's extracted and ingested automatically."""
