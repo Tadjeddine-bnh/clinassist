@@ -18,8 +18,8 @@ Then test at: http://localhost:8000/docs  (auto-generated Swagger UI)
 """
 
 import sys
-from pathlib import Path 
- 
+from pathlib import Path  
+from agent.privacy import unmask
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel 
 from config import settings
@@ -195,15 +195,14 @@ def chat(request: ChatRequest):
                 raise HTTPException(status_code=500, detail="The assistant took too many steps. Please rephrase the question.")
 
         messages = result["messages"]
-        answer = messages[-1].content                      # the last message is the final answer
-        tools_used = list(dict.fromkeys(                   # tool names, in order, no duplicates
+        masked_answer = messages[-1].content                     # what the LLM wrote: placeholders only
+        tools_used = list(dict.fromkeys(
             m.name for m in messages if m.type == "tool" and m.name not in HELPER_TOOLS
         ))
-        span.update(output={"answer": answer, "tools": tools_used})
+        span.update(output={"answer": masked_answer, "tools": tools_used})   # Langfuse never sees real values
         trace_id = handler.last_trace_id
 
-    return ChatResponse(question=q, answer=answer, tools_used=tools_used, trace_id=trace_id)  
-    
+    return ChatResponse(question=q, answer=unmask(masked_answer), tools_used=tools_used, trace_id=trace_id)
 @app.post("/feedback")
 def feedback(req: FeedbackRequest):
     get_client().create_score(trace_id=req.trace_id, name="user_feedback",
